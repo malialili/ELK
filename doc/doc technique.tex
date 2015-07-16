@@ -1,6 +1,8 @@
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[french]{babel}
+\AddThinSpaceBeforeFootnotes 
+\FrenchFootnotes 
 \usepackage[T1]{fontenc}
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -12,7 +14,7 @@
 \title{document technique}
 \begin{document}
 \maketitle
-
+\newpage
 \section{ Introduction}
 
 L'installation et le paramétrage de ELK (Elasticsearch, Logstash et Kibana) sur un serveur "loghost-ng" et sans installation de Logstash Forwarder (appelé auparavant Lumberjack) sur les machines clientes dont nous souhaitons analyser les logs car les logs sont centralisé au niveau de serveur. Le serveur Web sera le serveur apache.
@@ -96,6 +98,21 @@ ou
 # curl 'http://loghost-ng:9200/_nodes/?pretty'
 \end{verbatim}
 
+Pour minimiser l'espace mémoire occupé par les logs de elasticsearch, j'ai édité le fichier \textit{/etc/logrotate.d/elasticsearch } et j'ai ajouté ces lignes:
+\begin{verbatim}
+/var/log/elasticsearch/*.log {
+    daily
+    rotate 100
+    size 50M
+    copytruncate
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 644 elasticsearch elasticsearch
+}
+\end{verbatim}
+
 \subsection{Installation de logstash}
 Logstash est un outil de collecte, analyse et stockage de logs. Pour la collecte, il sait gérer plus d'une trentaine d'événements. Un événement peut être un message syslog, un mail via le protocole IMAP, un tweet ou encore une commande IRC.
 
@@ -148,6 +165,8 @@ input {
 #                type => "syslog"
 #       }
 }
+
+
 \end{verbatim}
 
 Pour la partie “input” du serveur, on crée le fichier \textbf{filter.conf}.
@@ -254,28 +273,18 @@ $sudo service kibana4 start
 
 $systemctl enable kibana
 $systemctl start kibana
-
-
-
 \end{verbatim}
 
 après l'installation on passe à la configuration de kinana, on lance le navigateur par l'adresse :  \textit{http://loghost-ng:5601}
-
 
 L'interface Kibana est divisé en quatre sections principales :
 
 \begin{itemize}
 	\item Discover
-	
     \item Visualize
-    
     \item Dashboard
-    
     \item Settings
-    
 \end{itemize}
-
-\newpage
 
 \textbf{Discover : }Présente toutes les données de votre index comme une table des documents.\\
 
@@ -285,7 +294,7 @@ L'interface Kibana est divisé en quatre sections principales :
 
 \includegraphics[scale=0.3]{visualize.png} \\
 
-\textbf{Dashboard:} Une page ou on peut créer , modifier et afficher nos propres tableaux de bord personnalisés . Avec un tableau de bord , nous pouvons combiner plusieurs visualisations sur une seule page, puis les filtrer en fournissant une requête de recherche ou en sélectionnant des filtres en cliquant sur les éléments de la visualisation. Les tableaux de bord sont utiles lorsque nous souhaitons obtenir un aperçu de nos journaux , et établir des corrélations entre les différentes visualisations et les journaux.\\
+\textbf{Dashboard:} Une page ou on peut créer , modifier et afficher nos propres tableaux de bord personnalisés . Avec un tableau de bord , nous pouvons combiner plusieurs visualisations sur une seule page, puis les filtrer en fournissant une requête de recherche ou en sélectionnant des filtres en cliquant sur les éléments de la visualisation. Les tableaux de bord sont utiles lorsque nous souhaitons obtenir un aperçu de nos journaux , et établir des corrélations entre les différentes visualisations et les journaux \footnote{pour plus d'information d'utilisation de kibana 4: \textit{https://www.elastic.co/blog/kibana-4-video-tutorials-part-1}}.\\
 
 \includegraphics[scale=0.3]{dashboard.png} \\
 
@@ -320,6 +329,9 @@ informations qu'on voulait dans une barre de recherche:\\
 
 \item La requête pour visualiser tous les connexions x2go:
 
+\begin{verbatim}
+ 	program:x2goserver
+\end{verbatim}
 
 \item La requête pour visualiser tous les connexions ssh:
 
@@ -329,7 +341,27 @@ informations qu'on voulait dans une barre de recherche:\\
 
 \end{itemize}
 \section{Création des vues et des dashboards Kibana} 
-pour plus d'information d'utilisation de kibana 4 consulter: 
 
-\textit{https://www.elastic.co/blog/kibana-4-video-tutorials-part-1}
+\subsection{Les dashboards} 
+J'ai crée 4 dashboards :
+\begin{itemize}
+\item\textbf{ First Dashboard: } il y a la carte qui localise les logs apache. 
+\item\textbf{ RDC de CREMI:} il y a les vues qui présente les connexions des machines de chaque salle de RDC, les connexions des machines de chaque salle par jour, semaine et mois.
+\item\textbf{ 1er ETAGE DE CREMI:}  il y a les vues qui présente les connexions des machines de chaque salle de 1er étage, les connexions des machines de chaque salle par jour, semaine et mois.
+\item\textbf{ 2eme ETAGE DE CREMI:}  il y a les vues qui présente les connexions des machines de chaque salle de 2eme étage, les connexions des machines de chaque salle par jour, semaine et mois.
+\end{itemize}
+
+\subsection{Les vues}
+
+j'ai crée plusieurs histogrammes et graphes qui présentent nombre d'authentification par machine, par salle, par jour, par semaine et par mois. Je les ai positionné par ordre de salle et par étage dans les dashboards\footnote{voir sur le serveur de logs: http://loghost-ng:5601}. \\
+
+\section{Conclusion}
+
+Pile Elk l'outil permettant de centraliser et d’analyser les données en temps réel.Il peut nous informer en direct de différentes connexions via l’utilisation de dashboards personnalisés.
+
+il peut aussi traiter d'autre type de logs comme les logs apache, nagios ..etc et créer des statistiques et des présentations qu'on personnalise. 
+
+Au final, L'utilisation de ELK est vaste et souple. 
+
+
 \end{document}
