@@ -1,0 +1,26 @@
+cluster.name: docker-elk
+node.name: elasticsearch
+node.master: true
+node.data: true
+
+# Configuration pour un seul nœud en développement
+cluster.initial_master_nodes: elasticsearch
+
+# Désactiver la sécurité pour simplifier le développement
+xpack.security.enabled: false
+xpack.security.http.ssl.enabled: false
+
+# Configuration réseau
+network.host: 0.0.0.0
+http.port: 9200
+transport.port: 9300
+
+# Désactiver le multicast discovery
+Discovery.zen.ping.multicast.enabled: false
+
+# Configuration des réplicas et shards pour le développement
+index.number_of_shards: 1
+index.number_of_replicas: 0
+
+# Configuration de la mémoire
+bootstrap.memory_lock: true

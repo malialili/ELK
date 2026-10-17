@@ -1,0 +1,22 @@
+# Configuration de Kibana
+server.host: "0.0.0.0"
+server.port: 5601
+
+# URL d'Elasticsearch
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+
+# Désactiver la sécurité
+xpack.security.enabled: false
+
+# Index pour les sauvegardes Kibana
+kibana.index: ".kibana"
+
+# Application par défaut
+defaultAppId: "discover"
+
+# Timeout pour les requêtes
+requestTimeout: 300000
+shardTimeout: 0
+
+# Désactiver la vérification SSL
+verifySSL: false
